@@ -1,0 +1,155 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-brand-dark: #264653;
+  --color-brand-teal: #2A9D8F;
+  --color-brand-gold: #E9C46A;
+
+  /* Brand-derived neutrals (tinted toward teal hue) */
+  --color-brand-50: #f0f7f8;
+  --color-brand-100: #dceef0;
+  --color-brand-200: #b8dde1;
+  --color-brand-300: #8bc5cc;
+  --color-brand-400: #5da8b2;
+  --color-brand-500: #3d8a94;
+  --color-brand-600: #264653;
+  --color-brand-700: #1e3843;
+  --color-brand-800: #162a33;
+  --color-brand-900: #0e1c23;
+
+  /* Surface tokens */
+  --color-surface: #fafcfc;
+  --color-surface-raised: #ffffff;
+  --color-surface-overlay: oklch(0.98 0.005 200);
+
+  /* Ink tokens */
+  --color-ink: #1a2e35;
+  --color-ink-muted: #3d5a65;
+  --color-ink-subtle: #6d8f9a;
+
+  /* Font family */
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Custom easing curves (from emil-design-eng) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out-quart: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
+  /* Spacing scale additions */
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+  --spacing-30: 7.5rem;
+
+  /* Border radius (consistent system) */
+  --radius-card: 0.75rem;
+  --radius-input: 0.5rem;
+  --radius-button: 0.5rem;
+
+  /* Shadows (tinted to brand hue) */
+  --shadow-card: 0 1px 3px oklch(0.2 0.02 200 / 0.08), 0 8px 24px oklch(0.2 0.02 200 / 0.06);
+  --shadow-card-hover: 0 4px 12px oklch(0.2 0.02 200 / 0.12), 0 16px 40px oklch(0.2 0.02 200 / 0.08);
+  --shadow-form: 0 4px 6px oklch(0.2 0.02 200 / 0.05), 0 20px 50px oklch(0.2 0.02 200 / 0.1);
+}
+
+/* Base styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background-color: var(--color-surface);
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+    line-height: 1.15;
+  }
+
+  p {
+    max-width: 65ch;
+    text-wrap: pretty;
+  }
+
+  /* Button base: tactile press feedback (emil-design-eng) */
+  button, a[role="button"] {
+    transition: transform 160ms var(--ease-out);
+  }
+
+  button:active, a[role="button"]:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Z-index scale */
+@layer utilities {
+  .z-sticky { z-index: 10; }
+  .z-dropdown { z-index: 20; }
+  .z-modal-backdrop { z-index: 40; }
+  .z-modal { z-index: 50; }
+  .z-tooltip { z-index: 60; }
+}
+
+/* Scroll reveal system (IntersectionObserver-driven) */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 600ms var(--ease-out-quart), transform 600ms var(--ease-out-quart);
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 500ms var(--ease-out-quart), transform 500ms var(--ease-out-quart);
+}
+
+[data-reveal].revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal, [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Entry animation for stagger reveals */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-up {
+    animation: fade-up 600ms var(--ease-out-quart) forwards;
+    opacity: 0;
+  }
+}
