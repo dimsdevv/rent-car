@@ -1,8 +1,10 @@
-import { useState } from 'react'
-import { CaretDown } from '@phosphor-icons/react'
+﻿import { useState, useEffect } from 'react'
+import { CaretDown, CircleNotch } from '@phosphor-icons/react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
+import axios from 'axios'
 
-const faqs = [
+// Fallback data if API is unavailable
+const FALLBACK_FAQS = [
   {
     q: 'Bagaimana cara booking mobil di JelajahCar?',
     a: 'Isi form booking di halaman ini dengan data lengkap, lalu klik "Cari & Booking". Tim kami akan menghubungi Anda via WhatsApp dalam 1x24 jam untuk konfirmasi detail dan pembayaran.',
@@ -64,7 +66,34 @@ function FAQItem({ item, isOpen, onToggle }) {
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState(0)
+  const [faqs, setFaqs] = useState(FALLBACK_FAQS)
+  const [loading, setLoading] = useState(true)
   const sectionRef = useScrollReveal()
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function fetchFaqs() {
+      try {
+        const res = await axios.get('/api/faq', { params: { per_page: 20 } })
+        if (!cancelled && res.data?.success && res.data.data?.data?.length > 0) {
+          // Map API fields to component fields
+          const mapped = res.data.data.data.map((item) => ({
+            q: item.question,
+            a: item.answer,
+          }))
+          setFaqs(mapped)
+        }
+      } catch {
+        // Keep fallback data
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    fetchFaqs()
+    return () => { cancelled = true }
+  }, [])
 
   return (
     <section id="faq" className="py-24 lg:py-32 px-6 lg:px-8 bg-brand-50">
@@ -79,17 +108,26 @@ export default function FAQ() {
           </p>
         </div>
 
+        {/* Loading state */}
+        {loading && (
+          <div className="flex justify-center py-12">
+            <CircleNotch className="w-8 h-8 text-brand-teal animate-spin" weight="bold" />
+          </div>
+        )}
+
         {/* FAQ list */}
-        <div className="bg-surface-raised rounded-[var(--radius-card)] border border-brand-100 px-6 lg:px-8 divide-y-0">
-          {faqs.map((faq, i) => (
-            <FAQItem
-              key={i}
-              item={faq}
-              isOpen={openIndex === i}
-              onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
-            />
-          ))}
-        </div>
+        {!loading && (
+          <div className="bg-surface-raised rounded-[var(--radius-card)] border border-brand-100 px-6 lg:px-8 divide-y-0">
+            {faqs.map((faq, i) => (
+              <FAQItem
+                key={i}
+                item={faq}
+                isOpen={openIndex === i}
+                onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

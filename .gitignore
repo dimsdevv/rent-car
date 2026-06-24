@@ -7,6 +7,16 @@ Thumbs.db
 verify-*.png
 verify-*.jpg
 verify-*.jpeg
+api/cache/*.cache
+node_modules
+dist
+.env
+*.log
+.DS_Store
+Thumbs.db
+verify-*.png
+verify-*.jpg
+verify-*.jpeg
 node_modules
 dist
 .env

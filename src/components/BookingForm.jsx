@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { MagnifyingGlass, CalendarBlank, MapPin, Car, CircleNotch, CheckCircle, Warning } from '@phosphor-icons/react'
+import { useState, useEffect } from 'react'
+import { MagnifyingGlass, CalendarBlank, MapPin, Car, CircleNotch, CheckCircle, Warning, UserCircle } from '@phosphor-icons/react'
 import axios from 'axios'
+import { useAuth } from '../context/AuthContext'
 
 const LOCATIONS = [
   'Jakarta',
@@ -39,6 +40,7 @@ const validate = (form) => {
 }
 
 export default function BookingForm() {
+  const { user } = useAuth()
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -51,6 +53,18 @@ export default function BookingForm() {
   const [status, setStatus] = useState('idle')
   const [error, setError] = useState('')
   const [touched, setTouched] = useState({})
+
+  // Auto-fill from user profile
+  useEffect(() => {
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        email: prev.email || user.email || '',
+        phone: prev.phone || user.phone || '',
+      }))
+    }
+  }, [user])
 
   const errors = validate(form)
 
@@ -137,7 +151,7 @@ export default function BookingForm() {
   return (
     <section id="booking" className="relative -mt-10 z-20 px-6 lg:px-8 max-w-5xl mx-auto mb-24">
       <div className="bg-surface-raised rounded-[var(--radius-card)] shadow-[var(--shadow-form)] p-6 sm:p-8 lg:p-10">
-        <div className="flex items-center gap-3 mb-8">
+        <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-full bg-brand-teal/10 flex items-center justify-center">
             <MagnifyingGlass className="w-5 h-5 text-brand-teal" weight="bold" />
           </div>
@@ -146,6 +160,12 @@ export default function BookingForm() {
             <p className="text-sm text-ink-muted">Isi form di bawah untuk reservasi kendaraan</p>
           </div>
         </div>
+        {user && (
+          <p className="flex items-center gap-1.5 text-xs text-brand-teal mb-6">
+            <UserCircle className="w-4 h-4" weight="fill" />
+            Data terisi otomatis dari profil Anda
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Contact info row */}

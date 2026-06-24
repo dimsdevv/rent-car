@@ -1,4 +1,5 @@
 import { Phone, ArrowRight } from '@phosphor-icons/react'
+import { Link } from 'react-router-dom'
 
 export default function CTABanner() {
   return (
@@ -26,13 +27,13 @@ export default function CTABanner() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="#booking"
+              <Link
+                to="/#booking"
                 className="group inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-brand-gold text-brand-dark font-bold rounded-[var(--radius-button)] transition-all duration-200 ease-[var(--ease-out)] hover:bg-brand-gold/90 hover:shadow-lg hover:shadow-brand-gold/20"
               >
                 Booking Online
                 <ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-0.5" weight="bold" />
-              </a>
+              </Link>
               <a
                 href="tel:+6281234567890"
                 className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-white/[0.08] border border-white/[0.15] text-white font-semibold rounded-[var(--radius-button)] transition-all duration-200 ease-[var(--ease-out)] hover:bg-white/[0.12]"

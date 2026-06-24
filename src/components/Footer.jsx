@@ -1,10 +1,11 @@
 import { MapPin, Phone, EnvelopeSimple } from '@phosphor-icons/react'
+import { Link } from 'react-router-dom'
 
 const links = [
-  { label: 'Beranda', href: '#' },
-  { label: 'Armada', href: '#fleet' },
-  { label: 'Tentang Kami', href: '#about' },
-  { label: 'Kontak', href: '#contact' },
+  { label: 'Beranda', to: '/' },
+  { label: 'Armada', to: '/armada' },
+  { label: 'Keunggulan', to: '/keunggulan' },
+  { label: 'Kontak', to: '/kontak' },
 ]
 
 export default function Footer() {
@@ -15,10 +16,12 @@ export default function Footer() {
           {/* Brand column */}
           <div className="md:col-span-5">
             <div className="flex items-center gap-2.5 mb-5">
+              <Link to="/" className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-lg bg-brand-teal flex items-center justify-center">
                 <span className="text-white font-extrabold text-sm">JC</span>
               </div>
               <span className="text-white font-extrabold text-lg tracking-tight">JelajahCar</span>
+              </Link>
             </div>
             <p className="text-sm leading-relaxed max-w-xs mb-6">
               Rental mobil terpercaya untuk perjalanan nyaman dan aman di seluruh Indonesia. Berdiri sejak 2018.
@@ -44,13 +47,13 @@ export default function Footer() {
             <h4 className="text-white font-bold text-sm mb-4">Navigasi</h4>
             <nav className="space-y-3">
               {links.map((link) => (
-                <a
+                <Link
                   key={link.label}
-                  href={link.href}
+                  to={link.to}
                   className="block text-sm hover:text-brand-teal transition-colors duration-200"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </nav>
           </div>
@@ -59,10 +62,10 @@ export default function Footer() {
           <div className="md:col-span-3">
             <h4 className="text-white font-bold text-sm mb-4">Layanan</h4>
             <nav className="space-y-3">
-              <a href="#" className="block text-sm hover:text-brand-teal transition-colors duration-200">Rental Harian</a>
-              <a href="#" className="block text-sm hover:text-brand-teal transition-colors duration-200">Rental Mingguan</a>
-              <a href="#" className="block text-sm hover:text-brand-teal transition-colors duration-200">Rental Bulanan</a>
-              <a href="#" className="block text-sm hover:text-brand-teal transition-colors duration-200">Antar-Jemput Bandara</a>
+              <Link to="/#booking" className="block text-sm hover:text-brand-teal transition-colors duration-200">Rental Harian</Link>
+              <Link to="/#booking" className="block text-sm hover:text-brand-teal transition-colors duration-200">Rental Mingguan</Link>
+              <Link to="/#booking" className="block text-sm hover:text-brand-teal transition-colors duration-200">Rental Bulanan</Link>
+              <Link to="/#booking" className="block text-sm hover:text-brand-teal transition-colors duration-200">Antar-Jemput Bandara</Link>
             </nav>
           </div>
         </div>

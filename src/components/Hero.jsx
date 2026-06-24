@@ -1,4 +1,5 @@
 import { ArrowRight } from '@phosphor-icons/react'
+import { Link } from 'react-router-dom'
 
 export default function Hero() {
   return (
@@ -47,12 +48,12 @@ export default function Hero() {
               Booking Sekarang
               <ArrowRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-0.5" weight="bold" />
             </a>
-            <a
-              href="#why"
+            <Link
+              to="/keunggulan"
               className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-white/10 border border-white/20 text-white font-semibold text-base rounded-[var(--radius-button)] backdrop-blur-sm transition-all duration-200 ease-[var(--ease-out)] hover:bg-white/15 hover:border-white/30"
             >
               Kenapa JelajahCar?
-            </a>
+            </Link>
           </div>
         </div>
       </div>
