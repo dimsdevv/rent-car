@@ -10,6 +10,7 @@
  * Pagination: page & per_page query params
  */
 
+require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/cache.php';
 
