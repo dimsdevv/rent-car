@@ -40,7 +40,7 @@ const validate = (form) => {
 }
 
 export default function BookingForm() {
-  const { user } = useAuth()
+  const { user, token } = useAuth()
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -109,7 +109,10 @@ export default function BookingForm() {
 
     try {
       await axios.post('/api/booking.php', form, {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
       })
       setStatus('success')
       setForm({

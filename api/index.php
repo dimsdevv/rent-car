@@ -45,6 +45,7 @@ $apiRoutes = [
     '/api/cars'         => __DIR__ . '/cars.php',
     '/api/testimonials' => __DIR__ . '/testimonials.php',
     '/api/faq'          => __DIR__ . '/faq.php',
+    '/api/debug'        => __DIR__ . '/debug.php',
 ];
 
 foreach ($apiRoutes as $prefix => $file) {

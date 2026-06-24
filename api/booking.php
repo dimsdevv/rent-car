@@ -31,6 +31,7 @@ if ($method === 'POST') {
     $pickup  = $input['pickup_date'] ?? '';
     $return  = $input['return_date'] ?? '';
     $carType = sanitize($input['car_type'] ?? '');
+    $carId   = isset($input['car_id']) ? (int)$input['car_id'] : null;
 
     if (empty($name) || mb_strlen($name) < 2) {
         $errors['name'] = 'Nama lengkap wajib diisi (min 2 karakter)';
@@ -78,15 +79,18 @@ if ($method === 'POST') {
     // ── Insert booking (single query, no N+1) ──
     try {
         $bookingCode = generateBookingCode();
+        $userId = getAuthUserId();
 
         $id = insertRow('bookings', [
             'booking_code'    => $bookingCode,
+            'user_id'         => $userId ?: null,
             'name'            => $name,
             'email'           => $email,
             'phone'           => $phone,
             'pickup_location' => $loc,
             'pickup_date'     => $pickup,
             'return_date'     => $return,
+            'car_id'          => $carId ?: null,
             'car_type'        => $carType ?: null,
             'status'          => 'pending',
         ]);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Users, GasPump, Gear, CircleNotch, Car, MagnifyingGlass } from '@phosphor-icons/react'
 import axios from 'axios'
+import BookingModal from '../components/BookingModal'
 
 const CATEGORIES = [
   { slug: '', label: 'Semua' },
@@ -21,6 +22,7 @@ export default function FleetPage() {
   const [categories, setCategories] = useState(CATEGORIES)
   const [activeCategory, setActiveCategory] = useState('')
   const [loading, setLoading] = useState(true)
+  const [selectedCar, setSelectedCar] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -175,12 +177,12 @@ export default function FleetPage() {
                             <span className="text-ink-subtle font-normal text-sm">/hari</span>
                           </p>
                         </div>
-                        <Link
-                          to="/#booking"
+                        <button
+                          onClick={() => setSelectedCar(car)}
                           className="px-5 py-2.5 bg-brand-teal text-white text-sm font-bold rounded-[var(--radius-button)] hover:bg-brand-teal/90 transition-colors duration-200"
                         >
                           Booking
-                        </Link>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -190,6 +192,13 @@ export default function FleetPage() {
           )}
         </div>
       </section>
+
+      {/* Booking Modal */}
+      <BookingModal 
+        open={!!selectedCar} 
+        onClose={() => setSelectedCar(null)} 
+        car={selectedCar} 
+      />
     </>
   )
 }
