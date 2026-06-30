@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { List, X, SignIn, SignOut, Clock } from '@phosphor-icons/react'
 import { useAuth } from '../context/AuthContext'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const navLinks = [
   { label: 'Beranda', to: '/' },
@@ -108,29 +109,37 @@ export default function Navbar({ onOpenAuth, onOpenHistory }) {
               </button>
 
               {/* Dropdown */}
-              {dropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-surface-raised rounded-[var(--radius-card)] shadow-[var(--shadow-card-hover)] border border-brand-100 py-2 animate-[dropdownIn_150ms_var(--ease-out)] origin-top-right">
-                  <div className="px-4 py-2 border-b border-brand-100">
-                    <p className="font-bold text-sm text-ink truncate">{user.name}</p>
-                    <p className="text-xs text-ink-subtle truncate">{user.email}</p>
-                  </div>
-                  <button
-                    onClick={() => { setDropdownOpen(false); onOpenHistory?.() }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-brand-50 transition-colors"
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    transition={{ duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-surface-raised rounded-[var(--radius-card)] shadow-[var(--shadow-card-hover)] border border-brand-100 py-2 origin-top-right"
                   >
-                    <Clock className="w-4 h-4 text-ink-subtle" weight="bold" />
-                    Riwayat Booking
-                  </button>
-                  <div className="border-t border-brand-100 my-1" />
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <SignOut className="w-4 h-4" weight="bold" />
-                    Keluar
-                  </button>
-                </div>
-              )}
+                    <div className="px-4 py-2 border-b border-brand-100">
+                      <p className="font-bold text-sm text-ink truncate">{user.name}</p>
+                      <p className="text-xs text-ink-subtle truncate">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => { setDropdownOpen(false); onOpenHistory?.() }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-ink hover:bg-brand-50 transition-colors"
+                    >
+                      <Clock className="w-4 h-4 text-ink-subtle" weight="bold" />
+                      Riwayat Booking
+                    </button>
+                    <div className="border-t border-brand-100 my-1" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <SignOut className="w-4 h-4" weight="bold" />
+                      Keluar
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           ) : !loading ? (
             <button
@@ -171,72 +180,80 @@ export default function Navbar({ onOpenAuth, onOpenHistory }) {
       </nav>
 
       {/* Mobile dropdown */}
-      {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-brand-100 shadow-lg">
-          <div className="px-6 py-6 space-y-4">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.to
-              return (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  onClick={() => setMobileOpen(false)}
-                  className={`block text-base font-medium transition-colors ${
-                    isActive ? 'text-brand-teal font-bold' : 'text-ink hover:text-brand-teal'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              )
-            })}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+            className="md:hidden bg-white border-t border-brand-100 shadow-lg overflow-hidden"
+          >
+            <div className="px-6 py-6 space-y-4">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.to
+                return (
+                  <Link
+                    key={link.label}
+                    to={link.to}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block text-base font-medium transition-colors ${
+                      isActive ? 'text-brand-teal font-bold' : 'text-ink hover:text-brand-teal'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
 
-            {/* Mobile auth */}
-            {!loading && user ? (
-              <>
-                <div className="flex items-center gap-3 py-3 border-t border-brand-100">
-                  <div className="w-10 h-10 rounded-full bg-brand-teal flex items-center justify-center text-white text-sm font-bold">
-                    {initials}
+              {/* Mobile auth */}
+              {!loading && user ? (
+                <>
+                  <div className="flex items-center gap-3 py-3 border-t border-brand-100">
+                    <div className="w-10 h-10 rounded-full bg-brand-teal flex items-center justify-center text-white text-sm font-bold">
+                      {initials}
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-ink">{user.name}</p>
+                      <p className="text-xs text-ink-subtle">{user.email}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-bold text-sm text-ink">{user.name}</p>
-                    <p className="text-xs text-ink-subtle">{user.email}</p>
-                  </div>
-                </div>
+                  <button
+                    onClick={() => { setMobileOpen(false); onOpenHistory?.() }}
+                    className="flex items-center gap-2 text-base font-medium text-ink hover:text-brand-teal transition-colors w-full"
+                  >
+                    <Clock className="w-5 h-5" weight="bold" />
+                    Riwayat Booking
+                  </button>
+                  <button
+                    onClick={() => { setMobileOpen(false); handleLogout() }}
+                    className="flex items-center gap-2 text-base font-medium text-red-600 hover:text-red-700 transition-colors w-full"
+                  >
+                    <SignOut className="w-5 h-5" weight="bold" />
+                    Keluar
+                  </button>
+                </>
+              ) : !loading ? (
                 <button
-                  onClick={() => { setMobileOpen(false); onOpenHistory?.() }}
-                  className="flex items-center gap-2 text-base font-medium text-ink hover:text-brand-teal transition-colors w-full"
+                  onClick={() => { setMobileOpen(false); onOpenAuth?.() }}
+                  className="flex items-center gap-2 text-base font-medium text-brand-teal hover:text-brand-teal/80 transition-colors w-full"
                 >
-                  <Clock className="w-5 h-5" weight="bold" />
-                  Riwayat Booking
+                  <SignIn className="w-5 h-5" weight="bold" />
+                  Masuk
                 </button>
-                <button
-                  onClick={() => { setMobileOpen(false); handleLogout() }}
-                  className="flex items-center gap-2 text-base font-medium text-red-600 hover:text-red-700 transition-colors w-full"
-                >
-                  <SignOut className="w-5 h-5" weight="bold" />
-                  Keluar
-                </button>
-              </>
-            ) : !loading ? (
-              <button
-                onClick={() => { setMobileOpen(false); onOpenAuth?.() }}
-                className="flex items-center gap-2 text-base font-medium text-brand-teal hover:text-brand-teal/80 transition-colors w-full"
+              ) : null}
+
+              <Link
+                to="/#booking"
+                onClick={() => setMobileOpen(false)}
+                className="block w-full text-center px-5 py-3 bg-brand-gold text-brand-dark font-bold rounded-[var(--radius-button)] mt-4"
               >
-                <SignIn className="w-5 h-5" weight="bold" />
-                Masuk
-              </button>
-            ) : null}
-
-            <Link
-              to="/#booking"
-              onClick={() => setMobileOpen(false)}
-              className="block w-full text-center px-5 py-3 bg-brand-gold text-brand-dark font-bold rounded-[var(--radius-button)] mt-4"
-            >
-              Booking Sekarang
-            </Link>
-          </div>
-        </div>
-      )}
+                Booking Sekarang
+              </Link>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }

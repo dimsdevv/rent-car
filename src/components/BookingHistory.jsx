@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { X, CalendarBlank, Car, Clock, CheckCircle, XCircle, Warning, CreditCard, WhatsappLogo, ArrowRight, ArrowClockwise } from '@phosphor-icons/react'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // Configuration for Booking Status
 const STATUS_CONFIG = {
@@ -101,7 +102,7 @@ export default function BookingHistory({ open, onClose }) {
     }, 1500)
   }
 
-  if (!open) return null
+  // if (!open) return null
 
   const filteredBookings = bookings.filter(b => {
     if (activeTab === 'active') return b.status === 'pending' || b.status === 'confirmed'
@@ -109,16 +110,33 @@ export default function BookingHistory({ open, onClose }) {
   })
 
   return (
-    <div className="fixed inset-0 z-[90] flex justify-end" onClick={onClose}>
-      {/* Heavy Blur Overlay (High-end Glass effect) */}
-      <div className="absolute inset-0 bg-brand-dark/20 backdrop-blur-sm transition-opacity duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]" />
+    <AnimatePresence>
+      {open && (
+        <div className="fixed inset-0 z-[90] flex justify-end" onClick={onClose}>
+          {/* Heavy Blur Overlay (High-end Glass effect) */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+            className="absolute inset-0 bg-brand-dark/20 backdrop-blur-sm" 
+          />
 
-      {/* Slide Panel with Emil Design Eng ease-drawer */}
-      <div
-        ref={panelRef}
-        className="relative w-full max-w-md bg-brand-50/50 backdrop-blur-xl border-l border-white/40 shadow-2xl h-[100dvh] flex flex-col animate-[slideInRight_400ms_cubic-bezier(0.32,0.72,0,1)] origin-right"
-        onClick={(e) => e.stopPropagation()}
-      >
+          {/* Slide Panel with Emil Design Eng ease-drawer */}
+          <motion.div
+            ref={panelRef}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+              mass: 0.8
+            }}
+            className="relative w-full max-w-md bg-brand-50/50 backdrop-blur-xl border-l border-white/40 shadow-2xl h-[100dvh] flex flex-col origin-right"
+            onClick={(e) => e.stopPropagation()}
+          >
         {/* Header */}
         <div className="px-6 pt-8 pb-6 flex items-center justify-between">
           <div>
@@ -299,7 +317,9 @@ export default function BookingHistory({ open, onClose }) {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   )
 }

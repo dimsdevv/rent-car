@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { X, CalendarBlank, MapPin, CheckCircle, Car, UserCircle } from '@phosphor-icons/react'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function BookingModal({ open, onClose, car }) {
   const { user, token } = useAuth()
@@ -52,7 +53,7 @@ export default function BookingModal({ open, onClose, car }) {
     }
   }, [open])
 
-  if (!open || !car) return null
+  // if (!open || !car) return null
 
   const formatRupiah = (amount) => {
     return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount)
@@ -82,15 +83,32 @@ export default function BookingModal({ open, onClose, car }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
-      {/* Heavy Blur Overlay */}
-      <div className="absolute inset-0 bg-brand-dark/40 backdrop-blur-md transition-opacity duration-400 ease-[cubic-bezier(0.32,0.72,0,1)]" />
+    <AnimatePresence>
+      {open && car && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
+          {/* Heavy Blur Overlay */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+            className="absolute inset-0 bg-brand-dark/40 backdrop-blur-md" 
+          />
 
-      {/* Modal Content - Slide up on mobile, scale in on desktop */}
-      <div
-        className="relative w-full max-w-2xl bg-brand-50/50 backdrop-blur-xl sm:rounded-[2rem] rounded-t-[2rem] border sm:border-white/40 border-b-0 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-[slideUp_400ms_cubic-bezier(0.32,0.72,0,1)] sm:animate-[scaleIn_300ms_cubic-bezier(0.23,1,0.32,1)]"
-        onClick={(e) => e.stopPropagation()}
-      >
+          {/* Modal Content - Slide up on mobile, scale in on desktop */}
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+              mass: 0.8
+            }}
+            className="relative w-full max-w-2xl bg-brand-50/50 backdrop-blur-xl sm:rounded-[2rem] rounded-t-[2rem] border sm:border-white/40 border-b-0 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
         {/* Header */}
         <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-white/20 bg-white/40">
           <h2 className="text-xl font-extrabold text-ink tracking-tight">Booking Kendaraan</h2>
@@ -242,7 +260,9 @@ export default function BookingModal({ open, onClose, car }) {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   )
 }

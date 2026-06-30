@@ -36,13 +36,17 @@ if ($method === 'POST' && $action === '/register') {
     if (!empty($errors)) jsonError('Validasi gagal', 422, $errors);
 
     // Insert user
-    $userId = insertRow('users', [
-        'name'          => $name,
-        'email'         => $email,
-        'phone'         => $phone ?: null,
-        'password_hash' => password_hash($pass, PASSWORD_BCRYPT, ['cost' => 12]),
-        'is_active'     => 1,
-    ]);
+    try {
+        $userId = insertRow('users', [
+            'name'          => $name,
+            'email'         => $email,
+            'phone'         => $phone ?: null,
+            'password_hash' => password_hash($pass, PASSWORD_BCRYPT, ['cost' => 12]),
+            'is_active'     => 1,
+        ]);
+    } catch (Throwable $e) {
+        jsonError('Gagal menyimpan data ke database: ' . $e->getMessage(), 500);
+    }
 
     // Generate tokens
     [$access, $refresh] = generateTokens((int)$userId);

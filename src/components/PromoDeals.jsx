@@ -1,4 +1,5 @@
-import { Tag, ArrowRight, AirplaneTilt, CalendarDots, Percent } from '@phosphor-icons/react'
+import { useState, useEffect } from 'react'
+import { Tag, ArrowRight, AirplaneTilt, CalendarDots, Percent, Clock } from '@phosphor-icons/react'
 import { useScrollReveal } from '../hooks/useScrollReveal'
 
 const PROMOS = [
@@ -42,6 +43,44 @@ const PROMOS = [
 
 export default function PromoDeals() {
   const headerRef = useScrollReveal()
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+  const [dealType, setDealType] = useState('weekday') 
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date()
+      const day = now.getDay()
+      const hours = now.getHours()
+      
+      const isWeekend = (day === 5 && hours >= 17) || day === 6 || day === 0
+      setDealType(isWeekend ? 'weekend' : 'weekday')
+
+      let target = new Date(now)
+      if (!isWeekend) {
+        const daysToFriday = (5 - day + 7) % 7
+        target.setDate(now.getDate() + daysToFriday)
+        target.setHours(17, 0, 0, 0)
+      } else {
+        const daysToSunday = day === 0 ? 0 : 7 - day
+        target.setDate(now.getDate() + daysToSunday)
+        target.setHours(23, 59, 59, 999)
+      }
+
+      const diff = target.getTime() - now.getTime()
+      if (diff > 0) {
+        setTimeLeft({
+          days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((diff / 1000 / 60) % 60),
+          seconds: Math.floor((diff / 1000) % 60)
+        })
+      }
+    }
+
+    calculateTimeLeft()
+    const timer = setInterval(calculateTimeLeft, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   return (
     <section className="py-20 lg:py-24 px-6 lg:px-8">
@@ -63,6 +102,42 @@ export default function PromoDeals() {
             Lihat semua promo
             <ArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" weight="bold" />
           </a>
+        </div>
+
+        {/* Flash Deal Banner */}
+        <div className="mb-10 lg:mb-12 bg-gradient-to-br from-ink to-brand-dark text-white rounded-3xl p-6 lg:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/20 blur-[100px] rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-teal/20 blur-[80px] rounded-full -translate-x-1/3 translate-y-1/3 pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 md:gap-6">
+            <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 shadow-[0_0_30px_rgba(233,196,106,0.3)]">
+               <Clock className="w-8 h-8 text-brand-gold animate-pulse" weight="duotone" />
+            </div>
+            <div>
+              <h3 className="text-xl md:text-2xl font-extrabold text-white mb-1.5">
+                {dealType === 'weekday' ? 'Weekend Getaway Deal' : 'Last Minute Weekend Deal'}
+              </h3>
+              <p className="text-white/70 text-sm max-w-md">
+                {dealType === 'weekday' ? 'Pesan sekarang untuk liburan akhir pekan dengan harga spesial. Penawaran berakhir dalam:' : 'Diskon spesial eksklusif akhir pekan ini. Penawaran berakhir dalam:'}
+              </p>
+            </div>
+          </div>
+
+          <div className="relative z-10 flex gap-3 lg:gap-4 shrink-0">
+             {[
+               { label: 'Hari', value: timeLeft.days },
+               { label: 'Jam', value: timeLeft.hours },
+               { label: 'Menit', value: timeLeft.minutes },
+               { label: 'Detik', value: timeLeft.seconds },
+             ].map((item, idx) => (
+               <div key={idx} className="flex flex-col items-center">
+                 <div className="w-12 h-12 md:w-14 md:h-14 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/20 mb-1.5 shadow-inner">
+                    <span className="text-xl md:text-2xl font-extrabold text-brand-gold tabular-nums">{item.value.toString().padStart(2, '0')}</span>
+                 </div>
+                 <span className="text-[10px] text-white/60 uppercase tracking-widest font-bold">{item.label}</span>
+               </div>
+             ))}
+          </div>
         </div>
 
         {/* Mobile: horizontal scroll-snap, Desktop: grid */}

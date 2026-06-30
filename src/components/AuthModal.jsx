@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { X, CircleNotch, Warning, Eye, EyeSlash, UserCirclePlus, SignIn } from '@phosphor-icons/react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 
 const TABS = { LOGIN: 'login', REGISTER: 'register' }
@@ -66,7 +67,7 @@ export default function AuthModal({ open, onClose }) {
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  if (!open) return null
+  // Removed early return to allow exit animations
 
   const validate = tab === TABS.LOGIN ? validateLogin : validateRegister
   const currentErrors = validate(form)
@@ -121,13 +122,25 @@ export default function AuthModal({ open, onClose }) {
   }
 
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-[fadeIn_150ms_ease-out]"
-      onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
-    >
-      <div className="relative w-full max-w-md bg-surface-raised rounded-[var(--radius-card)] shadow-[var(--shadow-form)] animate-[modalIn_200ms_var(--ease-out)]">
-        {/* Close button */}
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          ref={overlayRef}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="relative w-full max-w-md bg-surface-raised rounded-[var(--radius-card)] shadow-[var(--shadow-form)]"
+          >
+            {/* Close button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-1.5 rounded-full text-ink-subtle hover:text-ink hover:bg-brand-50 transition-colors"
@@ -284,7 +297,9 @@ export default function AuthModal({ open, onClose }) {
             )}
           </p>
         </form>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
