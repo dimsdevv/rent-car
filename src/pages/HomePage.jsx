@@ -1,5 +1,6 @@
 import Hero from '../components/Hero'
 import SmartRecommender from '../components/SmartRecommender'
+import WeatherRecommender from '../components/WeatherRecommender'
 import TrustStrip from '../components/TrustStrip'
 import PromoDeals from '../components/PromoDeals'
 import BookingForm from '../components/BookingForm'
@@ -17,6 +18,7 @@ export default function HomePage() {
     <>
       <Hero />
       <SmartRecommender />
+      <WeatherRecommender />
       <TrustStrip />
       <PromoDeals />
       <BookingForm />

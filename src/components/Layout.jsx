@@ -8,6 +8,7 @@ import WhatsAppButton from './WhatsAppButton'
 import BackToTop from './BackToTop'
 import AuthModal from './AuthModal'
 import BookingHistory from './BookingHistory'
+import LiveActivityToast from './LiveActivityToast'
 
 export default function Layout() {
   const [authOpen, setAuthOpen] = useState(false)
@@ -41,6 +42,7 @@ export default function Layout() {
       <BackToTop />
       <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
       <BookingHistory open={historyOpen} onClose={() => setHistoryOpen(false)} />
+      <LiveActivityToast />
     </div>
   )
 }

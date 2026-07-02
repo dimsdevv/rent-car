@@ -99,6 +99,13 @@ function fetchAll(string $sql, array $params = []): array {
     return $stmt->fetchAll();
 }
 
+// ─── Execute query helper (returns rowCount) ─────────────────
+function execute(string $sql, array $params = []): int {
+    $stmt = getDB()->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->rowCount();
+}
+
 // ─── Insert helper (returns lastInsertId) ────────────────────
 function insertRow(string $table, array $data): string {
     $cols = implode(', ', array_keys($data));

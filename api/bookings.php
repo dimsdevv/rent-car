@@ -9,7 +9,41 @@ setCorsHeaders();
 
 $method = $_SERVER['REQUEST_METHOD'];
 $uri    = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$action = str_replace('/api/bookings', '', $uri) ?: '/';
+$action = str_replace(['/api/bookings.php', '/api/bookings'], '', $uri) ?: '/';
+
+// ─── POST /api/bookings/pay ──────────────────────────────────
+if ($method === 'POST' && $action === '/pay') {
+    $userId = requireAuth();
+    $input = getJsonInput();
+    
+    $bookingId = $input['booking_id'] ?? null;
+    // Bisa berupa ID atau booking_code
+    if (!$bookingId) {
+         jsonError('Booking ID atau Kode Booking wajib disertakan', 400);
+    }
+
+    // Ambil data booking milik user ini (cari berdasarkan ID atau booking_code)
+    $booking = fetchOne("SELECT id, status FROM bookings WHERE (id = :bid OR booking_code = :bcode) AND user_id = :uid", [
+        ':bid' => $bookingId,
+        ':bcode' => $bookingId,
+        ':uid' => $userId
+    ]);
+
+    if (!$booking) {
+        jsonError('Booking tidak ditemukan atau bukan milik Anda', 404);
+    }
+    
+    if ($booking['status'] !== 'pending') {
+        jsonError('Booking tidak dapat dibayar karena status: ' . $booking['status'], 400);
+    }
+    
+    // Smart logic: otomatis konfirmasi pembayaran
+    execute("UPDATE bookings SET status = 'confirmed', updated_at = NOW() WHERE id = :id", [
+        ':id' => $booking['id']
+    ]);
+    
+    jsonSuccess(['id' => $booking['id'], 'status' => 'confirmed'], 'Pembayaran berhasil dikonfirmasi secara otomatis via Smart Pay');
+}
 
 // ─── GET /api/bookings/history ───────────────────────────────
 if ($method === 'GET' && $action === '/history') {

@@ -106,10 +106,7 @@ export default function SmartRecommender() {
             <div className="p-8 md:p-12 md:w-1/3 bg-ink flex flex-col justify-between border-b md:border-b-0 md:border-r border-white/10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-brand-teal/20 blur-[100px] rounded-full translate-x-1/2 -translate-y-1/2" />
                 <div className="relative z-10">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-brand-teal text-xs font-bold uppercase tracking-wider mb-6">
-                    <Sparkle weight="fill" className="w-4 h-4" />
-                    Smart Match
-                  </div>
+
                   <h2 className="text-2xl md:text-3xl font-extrabold mb-4 leading-tight">
                     Temukan Mobil Ideal Anda.
                   </h2>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, CalendarBlank, MapPin, CheckCircle, Car, UserCircle } from '@phosphor-icons/react'
+import { X, CalendarBlank, MapPin, CheckCircle, Car, UserCircle, Sparkle, ArrowUpRight } from '@phosphor-icons/react'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -16,6 +16,47 @@ export default function BookingModal({ open, onClose, car }) {
   })
   const [status, setStatus] = useState('idle') // idle, loading, success, error
   const [error, setError] = useState('')
+
+  const [selectedCar, setSelectedCar] = useState(car)
+
+  // Sync selectedCar when car prop changes
+  useEffect(() => {
+    setSelectedCar(car)
+  }, [car])
+
+  const getUpgradeOffer = (currentCar) => {
+    if (!currentCar) return null
+    // Jangan tampilkan upgrade jika sudah di-upgrade
+    if (currentCar._isUpgrade) return null
+    const cat = (currentCar.category_name || '').toLowerCase()
+    
+    if (cat === 'standard' || cat === 'sedan' || cat === 'city car' || cat === 'city-car') {
+      return {
+        _isUpgrade: true,
+        _originalCarId: currentCar.id,
+        name: 'Toyota Fortuner GR',
+        category_name: 'SUV',
+        price_per_day: (Number(currentCar.price_per_day) || 0) + 150000,
+        image_url: 'https://images.unsplash.com/photo-1590362891991-f7004f058093?auto=format&fit=crop&q=80',
+        upsell_text: 'Upgrade ke SUV premium hanya +150rb/hari!'
+      }
+    }
+    
+    if (cat === 'suv' || cat === 'mpv') {
+      return {
+        _isUpgrade: true,
+        _originalCarId: currentCar.id,
+        name: 'Alphard Transformer',
+        category_name: 'Premium',
+        price_per_day: (Number(currentCar.price_per_day) || 0) + 350000,
+        image_url: 'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&q=80',
+        upsell_text: 'Nikmati kemewahan Premium MPV hanya +350rb/hari!'
+      }
+    }
+    return null
+  }
+
+  const upgradeOffer = getUpgradeOffer(selectedCar)
 
   // Prefill user data if logged in
   useEffect(() => {
@@ -65,10 +106,14 @@ export default function BookingModal({ open, onClose, car }) {
     setStatus('loading')
 
     try {
+      // Selalu gunakan car_id asli dari prop agar valid di database
+      // Jika user memilih upgrade, car_id tetap dari mobil asli
+      const actualCarId = selectedCar._isUpgrade ? selectedCar._originalCarId : selectedCar.id
       await axios.post('/api/booking.php', {
         ...form,
-        car_id: car.id,
-        car_type: car.category_name || '',
+        car_id: actualCarId,
+        car_type: selectedCar.category_name || '',
+        upgrade_requested: selectedCar._isUpgrade ? selectedCar.name : null,
       }, {
         headers: { 
           'Content-Type': 'application/json',
@@ -84,7 +129,7 @@ export default function BookingModal({ open, onClose, car }) {
 
   return (
     <AnimatePresence>
-      {open && car && (
+      {open && selectedCar && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center" onClick={onClose}>
           {/* Heavy Blur Overlay */}
           <motion.div 
@@ -128,7 +173,7 @@ export default function BookingModal({ open, onClose, car }) {
               </div>
               <h3 className="text-2xl font-extrabold text-ink mb-2">Booking Berhasil!</h3>
               <p className="text-ink-muted mb-8 max-w-sm">
-                Pemesanan untuk <strong>{car.name}</strong> telah kami terima. Anda bisa mengecek detailnya di Riwayat Booking.
+                Pemesanan untuk <strong>{selectedCar.name}</strong> telah kami terima. Anda bisa mengecek detailnya di Riwayat Booking.
               </p>
               <button
                 onClick={() => {
@@ -144,19 +189,30 @@ export default function BookingModal({ open, onClose, car }) {
             <div className="p-6">
               {/* Selected Car Info (Double Bezel) */}
               <div className="p-1.5 bg-white/40 rounded-2xl border border-brand-100/50 mb-6">
-                <div className="bg-white rounded-[calc(1rem-0.375rem)] shadow-sm p-4 flex gap-4 items-center">
+                <div className="bg-white rounded-[calc(1rem-0.375rem)] shadow-sm p-4 flex gap-4 items-center transition-all duration-300">
                   <div className="w-20 h-20 rounded-xl bg-brand-50 flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {car.image_url ? (
-                      <img src={car.image_url} alt={car.name} className="w-full h-full object-cover" />
+                    {selectedCar.image_url ? (
+                      <motion.img 
+                        key={selectedCar.image_url}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        src={selectedCar.image_url} 
+                        alt={selectedCar.name} 
+                        className="w-full h-full object-cover" 
+                      />
                     ) : (
                       <Car className="w-8 h-8 text-brand-teal" weight="duotone" />
                     )}
                   </div>
-                  <div>
-                    <h4 className="font-extrabold text-lg text-ink">{car.name}</h4>
-                    <p className="text-xs text-ink-subtle uppercase tracking-wider mb-1">{car.category_name}</p>
-                    <p className="text-brand-teal font-bold">{formatRupiah(car.price_per_day)} <span className="text-xs font-normal text-ink-subtle">/hari</span></p>
-                  </div>
+                  <motion.div 
+                    key={selectedCar.name}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                  >
+                    <h4 className="font-extrabold text-lg text-ink">{selectedCar.name}</h4>
+                    <p className="text-xs text-ink-subtle uppercase tracking-wider mb-1">{selectedCar.category_name}</p>
+                    <p className="text-brand-teal font-bold">{formatRupiah(selectedCar.price_per_day)} <span className="text-xs font-normal text-ink-subtle">/hari</span></p>
+                  </motion.div>
                 </div>
               </div>
 
@@ -240,6 +296,37 @@ export default function BookingModal({ open, onClose, car }) {
                     </div>
                   </div>
                 </div>
+
+                {/* Smart Upgrader */}
+                {upgradeOffer && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: 'auto' }}
+                    className="mt-6 p-4 rounded-2xl bg-gradient-to-br from-brand-dark to-brand-dark/90 border border-brand-gold/30 relative overflow-hidden group shadow-lg"
+                  >
+                    <div className="absolute top-0 right-0 p-2 pointer-events-none">
+                      <Sparkle className="w-16 h-16 text-brand-gold/5 -rotate-12" weight="fill" />
+                    </div>
+                    <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1 text-brand-gold">
+                          <Sparkle className="w-3.5 h-3.5" weight="fill" />
+                          <span className="text-[10px] uppercase font-extrabold tracking-[0.15em]">Smart Upgrade</span>
+                        </div>
+                        <p className="text-white text-sm font-bold mb-0.5">{upgradeOffer.name}</p>
+                        <p className="text-white/70 text-xs font-medium leading-relaxed">{upgradeOffer.upsell_text}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCar(upgradeOffer)}
+                        className="flex-shrink-0 flex items-center justify-center gap-1.5 px-4 py-2.5 sm:py-2 bg-brand-gold text-brand-dark text-xs font-bold rounded-xl hover:bg-yellow-400 active:scale-95 transition-all w-full sm:w-auto"
+                      >
+                        Ambil Upgrade
+                        <ArrowUpRight className="w-3.5 h-3.5" weight="bold" />
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
 
                 <div className="pt-4 pb-2 border-t border-brand-100/50 mt-6">
                   <button

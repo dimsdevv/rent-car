@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, CalendarBlank, Car, Clock, CheckCircle, XCircle, Warning, CreditCard, WhatsappLogo, ArrowRight, ArrowClockwise } from '@phosphor-icons/react'
+import { X, CalendarBlank, Car, Clock, CheckCircle, XCircle, Warning, CreditCard, WhatsappLogo, ArrowRight, ArrowClockwise, Sparkle } from '@phosphor-icons/react'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
+import TripRecapModal from './TripRecapModal'
 
 // Configuration for Booking Status
 const STATUS_CONFIG = {
@@ -58,6 +59,9 @@ export default function BookingHistory({ open, onClose }) {
 
   // Simulation state for payment
   const [simulatingPayment, setSimulatingPayment] = useState(null)
+  
+  // State for Trip Recap Modal
+  const [recapBooking, setRecapBooking] = useState(null)
 
   useEffect(() => {
     if (!open || !token) return
@@ -93,13 +97,23 @@ export default function BookingHistory({ open, onClose }) {
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  const handleSimulatePayment = (id) => {
+  const handleSimulatePayment = async (id) => {
     setSimulatingPayment(id)
-    setTimeout(() => {
-      // Optimistic UI update
-      setBookings(prev => prev.map(b => b.id === id || b.booking_code === id ? { ...b, status: 'confirmed' } : b))
+    setError('')
+    try {
+      const { data } = await axios.post('/api/bookings/pay', { booking_id: id })
+      if (data.success) {
+        // Use == for loose comparison to handle number/string type mismatches
+        setBookings(prev => prev.map(b => b.id == id || b.booking_code == id ? { ...b, status: 'confirmed' } : b))
+      } else {
+        setError(data.message || 'Pembayaran gagal')
+      }
+    } catch (err) {
+      console.error('Payment error:', err.response?.status, err.response?.data || err.message)
+      setError(err.response?.data?.message || 'Pembayaran gagal, silakan coba lagi')
+    } finally {
       setSimulatingPayment(null)
-    }, 1500)
+    }
   }
 
   // if (!open) return null
@@ -297,16 +311,29 @@ export default function BookingHistory({ open, onClose }) {
                           </a>
                         )}
                         {(b.status === 'completed' || b.status === 'cancelled') && (
-                          <a
-                            href="#booking"
-                            onClick={onClose}
-                            className="group w-full flex items-center justify-between pl-4 pr-1.5 py-1.5 bg-brand-50 text-brand-dark border border-brand-200/50 rounded-full transition-all duration-200 active:scale-[0.97] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-brand-100"
-                          >
-                            <span className="text-sm font-bold">Pesan Ulang</span>
-                            <div className="w-8 h-8 rounded-full bg-brand-200/30 flex items-center justify-center group-hover:bg-brand-200/50 transition-colors">
-                              <ArrowClockwise className="w-4 h-4" weight="bold" />
-                            </div>
-                          </a>
+                          <>
+                            {b.status === 'completed' && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setRecapBooking(b); }}
+                                className="group w-full flex items-center justify-between pl-4 pr-1.5 py-1.5 bg-brand-dark text-brand-gold rounded-full transition-all duration-200 active:scale-[0.97] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-brand-dark/90 hover:shadow-md mb-2 border border-brand-dark"
+                              >
+                                <span className="text-sm font-bold">Trip Recap ✦</span>
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                                  <Sparkle className="w-4 h-4 text-brand-gold" weight="fill" />
+                                </div>
+                              </button>
+                            )}
+                            <a
+                              href="#booking"
+                              onClick={onClose}
+                              className="group w-full flex items-center justify-between pl-4 pr-1.5 py-1.5 bg-brand-50 text-brand-dark border border-brand-200/50 rounded-full transition-all duration-200 active:scale-[0.97] ease-[cubic-bezier(0.23,1,0.32,1)] hover:bg-brand-100"
+                            >
+                              <span className="text-sm font-bold">Pesan Ulang</span>
+                              <div className="w-8 h-8 rounded-full bg-brand-200/30 flex items-center justify-center group-hover:bg-brand-200/50 transition-colors">
+                                <ArrowClockwise className="w-4 h-4" weight="bold" />
+                              </div>
+                            </a>
+                          </>
                         )}
                       </div>
 
@@ -320,6 +347,7 @@ export default function BookingHistory({ open, onClose }) {
       </motion.div>
         </div>
       )}
+      <TripRecapModal open={!!recapBooking} onClose={() => setRecapBooking(null)} booking={recapBooking} />
     </AnimatePresence>
   )
 }
